@@ -1,0 +1,21 @@
+[package]
+name = "dawn-stdlib-android"
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0-or-later"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+dawn-stdlib = { path = "../dawn-stdlib" }
+jni = { version = "*" }
+serde = { version = "*", features = ["derive"] }
+serde_json = { version = "*" }
+base64 = { version = "*" }
+
+[profile.release]
+lto = true
+
+[lib]
+name = "dawn"
+crate-type = ["cdylib"]
