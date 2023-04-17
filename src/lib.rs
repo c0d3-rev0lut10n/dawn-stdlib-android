@@ -45,6 +45,16 @@ struct SendMessage<'a> {
 	ciphertext: &'a str
 }
 
+#[derive(Serialize)]
+struct ParseMessage<'a> {
+	status: &'a str,
+	msg_type: u8,
+	msg_text: Option<&'a str>,
+	msg_bytes: Option<&'a str>,
+	new_pfs_key: &'a str,
+	mdc: &'a str
+}
+
 #[no_mangle]
 pub extern "C" fn Java_dawn_android_LibraryConnector_sendMsg<'local> (
 	mut env: JNIEnv<'local>,
@@ -109,4 +119,39 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_sendMsg<'local> (
 		Err(_) => { error!(env, "Could not serialize json"); }
 	};
 	send_message_json
+}
+
+#[no_mangle]
+pub extern "C" fn Java_dawn_android_LibraryConnector_parseMsg<'local> (
+	mut env: JNIEnv<'local>,
+	_class: JClass<'local>,
+	msg_ciphertext: JByteArray<'local>,
+	own_seckey_kyber: JByteArray<'local>,
+	remote_pubkey_sig: JByteArray<'local>,
+	pfs_key: JByteArray<'local>
+) -> JString<'local> {
+	
+	let msg_ciphertext = env.convert_byte_array(&msg_ciphertext);
+	if msg_ciphertext.is_err() { error!(env, "Could not get java variable: msg_ciphertext"); }
+	let msg_ciphertext = msg_ciphertext.unwrap();
+	
+	let own_seckey_kyber = env.convert_byte_array(&own_seckey_kyber);
+	if own_seckey_kyber.is_err() { error!(env, "Could not get java variable: own_seckey_kyber"); }
+	let own_seckey_kyber = own_seckey_kyber.unwrap();
+	
+	let remote_pubkey_sig = env.convert_byte_array(&remote_pubkey_sig);
+	if remote_pubkey_sig.is_err() { error!(env, "Could not get java variable: remote_pubkey_sig"); }
+	let remote_pubkey_sig = remote_pubkey_sig.unwrap();
+	let remote_pubkey_sig = match remote_pubkey_sig.len() {
+		0 => None,
+		_ => Some(remote_pubkey_sig.as_slice())
+	};
+	
+	let pfs_key = env.convert_byte_array(&pfs_key);
+	if pfs_key.is_err() { error!(env, "Could not get java variable: pfs_key"); }
+	let pfs_key = pfs_key.unwrap();
+	
+	
+	
+	error!(env, "Not implemented");
 }
