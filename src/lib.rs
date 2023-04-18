@@ -49,8 +49,8 @@ struct SendMessage<'a> {
 struct ParseMessage<'a> {
 	status: &'a str,
 	msg_type: u8,
-	msg_text: Option<&'a str>,
-	msg_bytes: Option<&'a str>,
+	msg_text: &'a str,
+	msg_bytes: &'a str,
 	new_pfs_key: &'a str,
 	mdc: &'a str
 }
@@ -151,7 +151,36 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseMsg<'local> (
 	if pfs_key.is_err() { error!(env, "Could not get java variable: pfs_key"); }
 	let pfs_key = pfs_key.unwrap();
 	
+	let ((msg_type, msg_text, msg_bytes), new_pfs_key, mdc) = match parse_msg(&msg_ciphertext, &own_seckey_kyber, remote_pubkey_sig, &pfs_key) {
+		Ok(res) => res,
+		Err(err) => { error!(env, &err); }
+	};
 	
+	let msg_text = match msg_text {
+		Some(text) => text,
+		None => "".to_string()
+	};
 	
-	error!(env, "Not implemented");
+	let msg_bytes = match msg_bytes {
+		Some(bytes) => BASE64.encode(&bytes),
+		None => "".to_string()
+	};
+	
+	let parse_message = ParseMessage {
+		status: "ok",
+		msg_type: msg_type,
+		msg_text: &msg_text,
+		msg_bytes: &msg_bytes,
+		new_pfs_key: &BASE64.encode(&new_pfs_key),
+		mdc: &mdc,
+	};
+	
+	let parse_message_json = match serde_json::to_string(&parse_message) {
+		Ok(res) => match env.new_string(res) {
+			Ok(res) => res,
+			Err(_) => { error!(env, "Could not create new java string"); }
+		},
+		Err(_) => { error!(env, "Could not serialize json"); }
+	};
+	parse_message_json
 }
