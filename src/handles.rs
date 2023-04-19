@@ -16,33 +16,4 @@
 	along with Dawn.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-mod handles;
-mod macros;
-mod messaging;
-
-use serde::{Serialize};
-
-#[derive(Serialize)]
-struct Error<'a> {
-	status: &'a str
-}
-
-#[derive(Serialize)]
-struct SendMessage<'a> {
-	status: &'a str,
-	new_pfs_key: &'a str,
-	mdc: &'a str,
-	ciphertext: &'a str
-}
-
-#[derive(Serialize)]
-struct ParseMessage<'a> {
-	status: &'a str,
-	msg_type: u8,
-	msg_text: &'a str,
-	msg_bytes: &'a str,
-	new_pfs_key: &'a str,
-	mdc: &'a str
-}
-
 
