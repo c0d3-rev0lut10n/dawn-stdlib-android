@@ -45,4 +45,16 @@ struct ParseMessage<'a> {
 	mdc: &'a str
 }
 
+#[derive(Serialize)]
+struct GenHandle<'a> {
+	status: &'a str,
+	handle: &'a str
+}
 
+#[derive(Serialize)]
+struct ParseHandle<'a> {
+	status: &'a str,
+	init_pk_kyber: &'a str,
+	init_pk_curve: &'a str,
+	name: &'a str
+}

@@ -12,6 +12,7 @@ jni = { version = "*" }
 serde = { version = "*", features = ["derive"] }
 serde_json = { version = "*" }
 base64 = { version = "*" }
+hex = { version = "*" }
 
 [profile.release]
 lto = true
