@@ -22,7 +22,7 @@ use jni::JNIEnv;
 use jni::objects::{JByteArray, JClass, JString};
 use jni::sys::jshort;
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as BASE64};
-use hex::decode;
+use hex::{encode, decode};
 use crate::{Error, GenHandle, ParseHandle};
 
 #[macro_use]
@@ -70,4 +70,37 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genHandle<'local> (
 		Err(_) => { error!(env, "Could not serialize json"); }
 	};
 	handle_json
+}
+
+#[no_mangle]
+pub extern "C" fn Java_dawn_android_LibraryConnector_parseHandle<'local> (
+	mut env: JNIEnv<'local>,
+	_class: JClass<'local>,
+	handle: JByteArray<'local>
+) -> JString<'local> {
+	
+	let handle = env.convert_byte_array(&handle);
+	if handle.is_err() { error!(env, "Could not get java variable: handle"); }
+	let handle = handle.unwrap();
+	
+	let (init_pubkey_kyber, init_pubkey_curve, name) = match parse_handle(handle) {
+		Ok(res) => res,
+		Err(err) => { error!(env, &format!("Standard Library returned error: {}", err)); }
+	};
+	
+	let parse_handle = ParseHandle {
+		status: "ok",
+		init_pk_kyber: &encode(&init_pubkey_kyber),
+		init_pk_curve: &encode(&init_pubkey_curve),
+		name: &name
+	};
+	
+	let parse_handle_json = match serde_json::to_string(&parse_handle) {
+		Ok(res) => match env.new_string(res) {
+			Ok(jstring) => jstring,
+			Err(_) => { error!(env, "Could not create new java string"); }
+		}
+		Err(_) => { error!(env, "Could not serialize json"); }
+	};
+	parse_handle_json
 }
