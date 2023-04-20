@@ -21,11 +21,8 @@ use dawn_stdlib::*;
 use jni::JNIEnv;
 use jni::objects::{JByteArray, JClass, JString};
 use jni::sys::jshort;
-use serde::{Serialize};
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as BASE64};
 use crate::{Error, SendMessage, ParseMessage};
-
-#[macro_use]
 use crate::error;
 
 #[no_mangle]
@@ -53,7 +50,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_sendMsg<'local> (
 		_ => Some(msg_string.as_str())
 	};
 	
-	let msg_bytes = env.convert_byte_array(&msg_bytes);
+	let msg_bytes = env.convert_byte_array(msg_bytes);
 	if msg_bytes.is_err() { error!(env, "Could not get java variable: msg_bytes"); }
 	let msg_bytes = msg_bytes.unwrap();
 	let msg_bytes = match msg_bytes.len() {
@@ -61,15 +58,15 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_sendMsg<'local> (
 		_ => Some(msg_bytes.as_slice())
 	};
 	
-	let remote_pubkey_kyber = env.convert_byte_array(&remote_pubkey_kyber);
+	let remote_pubkey_kyber = env.convert_byte_array(remote_pubkey_kyber);
 	if remote_pubkey_kyber.is_err() { error!(env, "Could not get java variable: remote_pubkey_kyber"); }
 	let remote_pubkey_kyber = remote_pubkey_kyber.unwrap();
 	
-	let own_seckey_sig = env.convert_byte_array(&own_seckey_sig);
+	let own_seckey_sig = env.convert_byte_array(own_seckey_sig);
 	if own_seckey_sig.is_err() { error!(env, "Could not get java variable: own_seckey_sig"); }
 	let own_seckey_sig = own_seckey_sig.unwrap();
 	
-	let pfs_key = env.convert_byte_array(&pfs_key);
+	let pfs_key = env.convert_byte_array(pfs_key);
 	if pfs_key.is_err() { error!(env, "Could not get java variable: pfs_key"); }
 	let pfs_key = pfs_key.unwrap();
 	
@@ -79,9 +76,9 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_sendMsg<'local> (
 	};
 	let send_message = SendMessage {
 		status: "ok",
-		new_pfs_key: &BASE64.encode(&new_pfs_key),
+		new_pfs_key: &BASE64.encode(new_pfs_key),
 		mdc: &mdc,
-		ciphertext: &BASE64.encode(&ciphertext)
+		ciphertext: &BASE64.encode(ciphertext)
 	};
 	
 	let send_message_json = match serde_json::to_string(&send_message) {
@@ -96,7 +93,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_sendMsg<'local> (
 
 #[no_mangle]
 pub extern "C" fn Java_dawn_android_LibraryConnector_parseMsg<'local> (
-	mut env: JNIEnv<'local>,
+	env: JNIEnv<'local>,
 	_class: JClass<'local>,
 	msg_ciphertext: JByteArray<'local>,
 	own_seckey_kyber: JByteArray<'local>,
@@ -104,15 +101,15 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseMsg<'local> (
 	pfs_key: JByteArray<'local>
 ) -> JString<'local> {
 	
-	let msg_ciphertext = env.convert_byte_array(&msg_ciphertext);
+	let msg_ciphertext = env.convert_byte_array(msg_ciphertext);
 	if msg_ciphertext.is_err() { error!(env, "Could not get java variable: msg_ciphertext"); }
 	let msg_ciphertext = msg_ciphertext.unwrap();
 	
-	let own_seckey_kyber = env.convert_byte_array(&own_seckey_kyber);
+	let own_seckey_kyber = env.convert_byte_array(own_seckey_kyber);
 	if own_seckey_kyber.is_err() { error!(env, "Could not get java variable: own_seckey_kyber"); }
 	let own_seckey_kyber = own_seckey_kyber.unwrap();
 	
-	let remote_pubkey_sig = env.convert_byte_array(&remote_pubkey_sig);
+	let remote_pubkey_sig = env.convert_byte_array(remote_pubkey_sig);
 	if remote_pubkey_sig.is_err() { error!(env, "Could not get java variable: remote_pubkey_sig"); }
 	let remote_pubkey_sig = remote_pubkey_sig.unwrap();
 	let remote_pubkey_sig = match remote_pubkey_sig.len() {
@@ -120,7 +117,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseMsg<'local> (
 		_ => Some(remote_pubkey_sig.as_slice())
 	};
 	
-	let pfs_key = env.convert_byte_array(&pfs_key);
+	let pfs_key = env.convert_byte_array(pfs_key);
 	if pfs_key.is_err() { error!(env, "Could not get java variable: pfs_key"); }
 	let pfs_key = pfs_key.unwrap();
 	
@@ -135,16 +132,16 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseMsg<'local> (
 	};
 	
 	let msg_bytes = match msg_bytes {
-		Some(bytes) => BASE64.encode(&bytes),
+		Some(bytes) => BASE64.encode(bytes),
 		None => "".to_string()
 	};
 	
 	let parse_message = ParseMessage {
 		status: "ok",
-		msg_type: msg_type,
+		msg_type,
 		msg_text: &msg_text,
 		msg_bytes: &msg_bytes,
-		new_pfs_key: &BASE64.encode(&new_pfs_key),
+		new_pfs_key: &BASE64.encode(new_pfs_key),
 		mdc: &mdc,
 	};
 	

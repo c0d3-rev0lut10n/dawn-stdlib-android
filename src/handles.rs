@@ -16,16 +16,12 @@
 	along with Dawn.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use std::convert::TryFrom;
 use dawn_stdlib::*;
 use jni::JNIEnv;
 use jni::objects::{JByteArray, JClass, JString};
-use jni::sys::jshort;
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as BASE64};
 use hex::{encode, decode};
 use crate::{Error, GenHandle, ParseHandle};
-
-#[macro_use]
 use crate::error;
 
 #[no_mangle]
@@ -40,7 +36,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genHandle<'local> (
 	let init_pubkey_kyber = env.get_string(&init_pubkey_kyber);
 	if init_pubkey_kyber.is_err() { error!(env, "Could not get java variable: init_pubkey_kyber"); }
 	let init_pubkey_kyber: String = init_pubkey_kyber.unwrap().into();
-	let init_pubkey_kyber = match decode(&init_pubkey_kyber) {
+	let init_pubkey_kyber = match decode(init_pubkey_kyber) {
 		Ok(bytes) => bytes,
 		Err(_) => { error!(env, "init_pubkey_kyber invalid"); }
 	};
@@ -48,7 +44,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genHandle<'local> (
 	let init_pubkey_curve = env.get_string(&init_pubkey_curve);
 	if init_pubkey_curve.is_err() { error!(env, "Could not get java variable: init_pubkey_curve"); }
 	let init_pubkey_curve: String = init_pubkey_curve.unwrap().into();
-	let init_pubkey_curve = match decode(&init_pubkey_curve) {
+	let init_pubkey_curve = match decode(init_pubkey_curve) {
 		Ok(bytes) => bytes,
 		Err(_) => { error!(env, "init_pubkey_curve invalid"); }
 	};
@@ -74,12 +70,12 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genHandle<'local> (
 
 #[no_mangle]
 pub extern "C" fn Java_dawn_android_LibraryConnector_parseHandle<'local> (
-	mut env: JNIEnv<'local>,
+	env: JNIEnv<'local>,
 	_class: JClass<'local>,
 	handle: JByteArray<'local>
 ) -> JString<'local> {
 	
-	let handle = env.convert_byte_array(&handle);
+	let handle = env.convert_byte_array(handle);
 	if handle.is_err() { error!(env, "Could not get java variable: handle"); }
 	let handle = handle.unwrap();
 	
@@ -90,8 +86,8 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseHandle<'local> (
 	
 	let parse_handle = ParseHandle {
 		status: "ok",
-		init_pk_kyber: &encode(&init_pubkey_kyber),
-		init_pk_curve: &encode(&init_pubkey_curve),
+		init_pk_kyber: &encode(init_pubkey_kyber),
+		init_pk_curve: &encode(init_pubkey_curve),
 		name: &name
 	};
 	
