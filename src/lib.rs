@@ -16,6 +16,7 @@
 	along with Dawn.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+mod crypto;
 mod handles;
 mod macros;
 mod messaging;
@@ -25,6 +26,16 @@ use serde::{Serialize};
 #[derive(Serialize)]
 struct Error<'a> {
 	status: &'a str
+}
+
+#[derive(Serialize)]
+struct InitCrypto<'a> {
+	status: &'a str,
+	id: &'a str,
+	own_pubkey_kyber: &'a str,
+	own_seckey_kyber: &'a str,
+	own_pubkey_curve: &'a str,
+	own_seckey_curve: &'a str
 }
 
 #[derive(Serialize)]
