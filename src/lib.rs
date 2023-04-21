@@ -39,6 +39,12 @@ struct InitCrypto<'a> {
 }
 
 #[derive(Serialize)]
+struct GenId<'a> {
+	status: &'a str,
+	id: &'a str
+}
+
+#[derive(Serialize)]
 struct SendMessage<'a> {
 	status: &'a str,
 	new_pfs_key: &'a str,

@@ -20,12 +20,12 @@ use dawn_stdlib::*;
 use jni::JNIEnv;
 use jni::objects::{JByteArray, JClass, JString};
 use hex::{encode, decode};
-use crate::{Error, InitCrypto};
+use crate::{Error, InitCrypto, GenId};
 use crate::error;
 
 #[no_mangle]
 pub extern "C" fn Java_dawn_android_LibraryConnector_initCrypto<'local> (
-	mut env: JNIEnv<'local>,
+	env: JNIEnv<'local>,
 	_class: JClass<'local>,
 ) -> JString<'local> {
 	
@@ -47,4 +47,25 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_initCrypto<'local> (
 		Err(_) => { error!(env, "Could not serialize json"); }
 	};
 	init_crypto_json
+}
+
+#[no_mangle]
+pub extern "C" fn Java_dawn_android_LibraryConnector_genId<'local> (
+	env: JNIEnv<'local>,
+	_class: JClass<'local>,
+) -> JString<'local> {
+	
+	let id = GenId {
+		status: "ok",
+		id: &id_gen(),
+	};
+	
+	let id_json = match serde_json::to_string(&id) {
+		Ok(res) => match env.new_string(res) {
+			Ok(jstring) => jstring,
+			Err(_) => { error!(env, "Could not create new java string"); }
+		}
+		Err(_) => { error!(env, "Could not serialize json"); }
+	};
+	id_json
 }
