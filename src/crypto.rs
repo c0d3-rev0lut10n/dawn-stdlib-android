@@ -20,7 +20,7 @@ use dawn_stdlib::*;
 use jni::JNIEnv;
 use jni::objects::{JByteArray, JClass, JString};
 use hex::{encode, decode};
-use crate::{Error, InitCrypto, GenId};
+use crate::{Error, InitCrypto, GenId, TempId};
 use crate::error;
 
 #[no_mangle]
@@ -68,4 +68,35 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genId<'local> (
 		Err(_) => { error!(env, "Could not serialize json"); }
 	};
 	id_json
+}
+
+#[no_mangle]
+pub extern "C" fn Java_dawn_android_LibraryConnector_getTempId<'local> (
+	mut env: JNIEnv<'local>,
+	_class: JClass<'local>,
+	id: JString<'local>,
+	modifier: JString<'local>
+) -> JString<'local> {
+	
+	let id = env.get_string(&id);
+	if id.is_err() { error!(env, "Could not get java variable: id"); }
+	let id: String = id.unwrap().into();
+	
+	let modifier = env.get_string(&modifier);
+	if modifier.is_err() { error!(env, "Could not get java variable: modifier"); }
+	let modifier: String = modifier.unwrap().into();
+	
+	let temp_id = TempId {
+		status: "ok",
+		id: &get_temp_id(&id, &modifier)
+	};
+	
+	let temp_id_json = match serde_json::to_string(&temp_id) {
+		Ok(res) => match env.new_string(res) {
+			Ok(jstring) => jstring,
+			Err(_) => { error!(env, "Could not create new java string"); }
+		}
+		Err(_) => { error!(env, "Could not serialize json"); }
+	};
+	temp_id_json
 }
