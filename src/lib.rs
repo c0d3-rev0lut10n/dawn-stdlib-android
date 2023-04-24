@@ -39,6 +39,13 @@ struct InitCrypto<'a> {
 }
 
 #[derive(Serialize)]
+struct SignKeys<'a> {
+	status: &'a str,
+	own_pubkey_sig: &'a str,
+	own_seckey_sig: &'a str
+}
+
+#[derive(Serialize)]
 struct GenId<'a> {
 	status: &'a str,
 	id: &'a str

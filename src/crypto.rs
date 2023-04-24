@@ -20,7 +20,7 @@ use dawn_stdlib::*;
 use jni::JNIEnv;
 use jni::objects::{JByteArray, JClass, JString};
 use hex::{encode, decode};
-use crate::{Error, InitCrypto, GenId, TempId, NextId};
+use crate::{Error, InitCrypto, SignKeys, GenId, TempId, NextId};
 use crate::error;
 
 #[no_mangle]
@@ -47,6 +47,29 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_initCrypto<'local> (
 		Err(_) => { error!(env, "Could not serialize json"); }
 	};
 	init_crypto_json
+}
+
+#[no_mangle]
+pub extern "C" fn Java_dawn_android_LibraryConnector_signKeygen<'local> (
+	env: JNIEnv<'local>,
+	_class: JClass<'local>,
+) -> JString<'local> {
+	
+	let (own_pubkey_sig, own_seckey_sig) = sign_keygen();
+	let sign_keygen = SignKeys {
+		status: "ok",
+		own_pubkey_sig: &encode(own_pubkey_sig),
+		own_seckey_sig: &encode(own_seckey_sig)
+	};
+	
+	let signkeys_json = match serde_json::to_string(&sign_keygen) {
+		Ok(res) => match env.new_string(res) {
+			Ok(jstring) => jstring,
+			Err(_) => { error!(env, "Could not create new java string"); }
+		}
+		Err(_) => { error!(env, "Could not serialize json"); }
+	};
+	signkeys_json
 }
 
 #[no_mangle]
