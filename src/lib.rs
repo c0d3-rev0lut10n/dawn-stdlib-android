@@ -18,6 +18,7 @@
 
 mod crypto;
 mod handles;
+mod init;
 mod macros;
 mod messaging;
 
@@ -27,6 +28,8 @@ use serde::{Serialize};
 struct Error<'a> {
 	status: &'a str
 }
+
+// Used in the crypto module:
 
 #[derive(Serialize)]
 struct InitCrypto<'a> {
@@ -63,6 +66,8 @@ struct NextId<'a> {
 	id: &'a str
 }
 
+// Used in the messaging module:
+
 #[derive(Serialize)]
 struct SendMessage<'a> {
 	status: &'a str,
@@ -81,6 +86,8 @@ struct ParseMessage<'a> {
 	mdc: &'a str
 }
 
+// Used in the handles module:
+
 #[derive(Serialize)]
 struct GenHandle<'a> {
 	status: &'a str,
@@ -93,4 +100,19 @@ struct ParseHandle<'a> {
 	init_pk_kyber: &'a str,
 	init_pk_curve: &'a str,
 	name: &'a str
+}
+
+// Used in the init module:
+
+#[derive(Serialize)]
+struct GenInitRequest<'a> {
+	status: &'a str,
+	own_pubkey_kyber: &'a str,
+	own_seckey_kyber: &'a str,
+	own_pubkey_curve: &'a str,
+	own_seckey_curve: &'a str,
+	pfs_key: &'a str,
+	id: &'a str,
+	mdc: &'a str,
+	ciphertext: &'a str
 }
