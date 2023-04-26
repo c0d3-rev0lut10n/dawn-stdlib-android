@@ -116,3 +116,15 @@ struct GenInitRequest<'a> {
 	mdc: &'a str,
 	ciphertext: &'a str
 }
+
+#[derive(Serialize)]
+struct ParseInitRequest<'a> {
+	status: &'a str,
+	id: &'a str,
+	mdc: &'a str,
+	remote_pubkey_kyber: &'a str,
+	remote_pubkey_sig: &'a str,
+	new_pfs_key: &'a str,
+	name: &'a str,
+	comment: &'a str
+}

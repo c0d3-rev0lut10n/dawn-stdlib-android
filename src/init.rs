@@ -21,7 +21,7 @@ use jni::JNIEnv;
 use jni::objects::{JByteArray, JClass, JString};
 use hex::{encode, decode};
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as BASE64};
-use crate::{Error, GenInitRequest};
+use crate::{Error, GenInitRequest, ParseInitRequest};
 use crate::error;
 
 #[no_mangle]
@@ -101,4 +101,59 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genInitRequest<'local> (
 		Err(_) => { error!(env, "Could not serialize json"); }
 	};
 	gen_init_request_json
+}
+
+#[no_mangle]
+pub extern "C" fn Java_dawn_android_LibraryConnector_parseInitRequest<'local> (
+	mut env: JNIEnv<'local>,
+	_class: JClass<'local>,
+	ciphertext: JByteArray<'local>,
+	own_seckey_kyber: JString<'local>,
+	own_seckey_curve: JString<'local>
+) -> JString<'local> {
+	
+	let ciphertext = env.convert_byte_array(ciphertext);
+	if ciphertext.is_err() { error!(env, "Could not get java variable: ciphertext"); }
+	let ciphertext = ciphertext.unwrap();
+	
+	let own_seckey_kyber = env.get_string(&own_seckey_kyber);
+	if own_seckey_kyber.is_err() { error!(env, "Could not get java variable: own_seckey_kyber"); }
+	let own_seckey_kyber: String = own_seckey_kyber.unwrap().into();
+	let own_seckey_kyber = match decode(own_seckey_kyber) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "own_seckey_kyber invalid"); }
+	};
+	
+	let own_seckey_curve = env.get_string(&own_seckey_curve);
+	if own_seckey_curve.is_err() { error!(env, "Could not get java variable: own_seckey_curve"); }
+	let own_seckey_curve: String = own_seckey_curve.unwrap().into();
+	let own_seckey_curve = match decode(own_seckey_curve) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "own_seckey_curve invalid"); }
+	};
+	
+	let (id, mdc, remote_pubkey_kyber, remote_pubkey_sig, new_pfs_key, name, comment) = match parse_init_request(&ciphertext, &own_seckey_kyber, &own_seckey_curve) {
+		Ok(res) => res,
+		Err(err) => { error!(env, &format!("Could not parse init request: {}", err)); }
+	};
+	
+	let parse_init_request = ParseInitRequest {
+		status: "ok",
+		id: &id,
+		mdc: &mdc,
+		remote_pubkey_kyber: &encode(remote_pubkey_kyber),
+		remote_pubkey_sig: &encode(remote_pubkey_sig),
+		new_pfs_key: &encode(new_pfs_key),
+		name: &name,
+		comment: &comment
+	};
+	
+	let parse_init_request_json = match serde_json::to_string(&parse_init_request) {
+		Ok(res) => match env.new_string(res) {
+			Ok(res) => res,
+			Err(_) => { error!(env, "Could not create new java string"); }
+		},
+		Err(_) => { error!(env, "Could not serialize json"); }
+	};
+	parse_init_request_json
 }
