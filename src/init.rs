@@ -21,7 +21,7 @@ use jni::JNIEnv;
 use jni::objects::{JByteArray, JClass, JString};
 use hex::{encode, decode};
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as BASE64};
-use crate::{Error, GenInitRequest, ParseInitRequest};
+use crate::{Error, GenInitRequest, ParseInitRequest, AcceptInitRequest};
 use crate::error;
 
 #[no_mangle]
@@ -156,4 +156,70 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseInitRequest<'local> (
 		Err(_) => { error!(env, "Could not serialize json"); }
 	};
 	parse_init_request_json
+}
+
+#[no_mangle]
+pub extern "C" fn Java_dawn_android_LibraryConnector_acceptInitRequest<'local> (
+	mut env: JNIEnv<'local>,
+	_class: JClass<'local>,
+	own_seckey_sig: JString<'local>,
+	own_pubkey_sig: JString<'local>,
+	remote_pubkey_kyber: JString<'local>,
+	pfs_key: JString<'local>
+) -> JString<'local> {
+	
+	let own_seckey_sig = env.get_string(&own_seckey_sig);
+	if own_seckey_sig.is_err() { error!(env, "Could not get java variable: own_seckey_sig"); }
+	let own_seckey_sig: String = own_seckey_sig.unwrap().into();
+	let own_seckey_sig = match decode(own_seckey_sig) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "own_seckey_sig invalid"); }
+	};
+	
+	let own_pubkey_sig = env.get_string(&own_pubkey_sig);
+	if own_pubkey_sig.is_err() { error!(env, "Could not get java variable: own_pubkey_sig"); }
+	let own_pubkey_sig: String = own_pubkey_sig.unwrap().into();
+	let own_pubkey_sig = match decode(own_pubkey_sig) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "own_pubkey_sig invalid"); }
+	};
+	
+	let remote_pubkey_kyber = env.get_string(&remote_pubkey_kyber);
+	if remote_pubkey_kyber.is_err() { error!(env, "Could not get java variable: remote_pubkey_kyber"); }
+	let remote_pubkey_kyber: String = remote_pubkey_kyber.unwrap().into();
+	let remote_pubkey_kyber = match decode(remote_pubkey_kyber) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "remote_pubkey_kyber invalid"); }
+	};
+	
+	let pfs_key = env.get_string(&pfs_key);
+	if pfs_key.is_err() { error!(env, "Could not get java variable: pfs_key"); }
+	let pfs_key: String = pfs_key.unwrap().into();
+	let pfs_key = match decode(pfs_key) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "pfs_key invalid"); }
+	};
+	
+	let (new_pfs_key, (own_pubkey_kyber, own_seckey_kyber), mdc, ciphertext) = match accept_init_request(&own_pubkey_sig, &own_seckey_sig, &remote_pubkey_kyber, &pfs_key) {
+		Ok(res) => res,
+		Err(err) => { error!(env, &format!("Could not create init accept message: {}", err)); }
+	};
+	
+	let accept_init_request = AcceptInitRequest {
+		status: "ok",
+		new_pfs_key: &encode(new_pfs_key),
+		own_pubkey_kyber: &encode(own_pubkey_kyber),
+		own_seckey_kyber: &encode(own_seckey_kyber),
+		mdc: &mdc,
+		ciphertext: &BASE64.encode(ciphertext)
+	};
+	
+	let accept_init_request_json = match serde_json::to_string(&accept_init_request) {
+		Ok(res) => match env.new_string(res) {
+			Ok(res) => res,
+			Err(_) => { error!(env, "Could not create new java string"); }
+		},
+		Err(_) => { error!(env, "Could not serialize json"); }
+	};
+	accept_init_request_json
 }

@@ -128,3 +128,13 @@ struct ParseInitRequest<'a> {
 	name: &'a str,
 	comment: &'a str
 }
+
+#[derive(Serialize)]
+struct AcceptInitRequest<'a> {
+	status: &'a str,
+	new_pfs_key: &'a str,
+	own_pubkey_kyber: &'a str,
+	own_seckey_kyber: &'a str,
+	mdc: &'a str,
+	ciphertext: &'a str
+}
