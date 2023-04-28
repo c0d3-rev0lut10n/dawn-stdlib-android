@@ -138,3 +138,12 @@ struct AcceptInitRequest<'a> {
 	mdc: &'a str,
 	ciphertext: &'a str
 }
+
+#[derive(Serialize)]
+struct ParseInitResponse<'a> {
+	status: &'a str,
+	remote_pubkey_kyber: &'a str,
+	remote_pubkey_sig: &'a str,
+	new_pfs_key: &'a str,
+	mdc: &'a str
+}
