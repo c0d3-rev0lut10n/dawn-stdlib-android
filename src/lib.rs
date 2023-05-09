@@ -49,6 +49,12 @@ struct SignKeys<'a> {
 }
 
 #[derive(Serialize)]
+struct SymKey<'a> {
+	status: &'a str,
+	key: &'a str
+}
+
+#[derive(Serialize)]
 struct GenId<'a> {
 	status: &'a str,
 	id: &'a str
