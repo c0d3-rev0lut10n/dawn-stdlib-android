@@ -72,6 +72,13 @@ struct NextId<'a> {
 	id: &'a str
 }
 
+#[derive(Serialize)]
+struct EncryptFile<'a> {
+	status: &'a str,
+	key: &'a str,
+	ciphertext: &'a str
+}
+
 // Used in the messaging module:
 
 #[derive(Serialize)]
