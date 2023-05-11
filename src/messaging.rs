@@ -23,7 +23,7 @@ use jni::objects::{JByteArray, JClass, JString};
 use jni::sys::jshort;
 use hex::{encode, decode};
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as BASE64};
-use crate::{Error, SendMessage, ParseMessage, EncryptFile};
+use crate::{Error, SendMessage, ParseMessage, EncryptFile, DecryptFile};
 use crate::error;
 
 #[no_mangle]
@@ -214,4 +214,45 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_encryptFile<'local> (
 		Err(_) => { error!(env, "Could not serialize json"); }
 	};
 	enc_file_json
+}
+
+#[no_mangle]
+pub extern "C" fn Java_dawn_android_LibraryConnector_decryptFile<'local> (
+	mut env: JNIEnv<'local>,
+	_class: JClass<'local>,
+	ciphertext: JByteArray<'local>,
+	key: JString<'local>
+) -> JString<'local> {
+	
+	let ciphertext = match env.convert_byte_array(&ciphertext) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "Could not read ciphertext"); }
+	};
+	
+	let key = env.get_string(&key);
+	if key.is_err() { error!(env, "Could not get java variable: key"); }
+	let key: String = key.unwrap().into();
+	let key = match decode(key) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "key invalid"); }
+	};
+	
+	let file = match decrypt_file(&ciphertext, &key) {
+		Ok(res) => res,
+		Err(err) => { error!(env, &err); }
+	};
+	
+	let file = DecryptFile {
+		status: "ok",
+		file: &encode(file)
+	};
+	
+	let file_json = match serde_json::to_string(&file) {
+		Ok(res) => match env.new_string(res) {
+			Ok(jstring) => jstring,
+			Err(_) => { error!(env, "Could not create new java string"); }
+		}
+		Err(_) => { error!(env, "Could not serialize json"); }
+	};
+	file_json
 }

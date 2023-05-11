@@ -79,6 +79,12 @@ struct EncryptFile<'a> {
 	ciphertext: &'a str
 }
 
+#[derive(Serialize)]
+struct DecryptFile<'a> {
+	status: &'a str,
+	file: &'a str
+}
+
 // Used in the messaging module:
 
 #[derive(Serialize)]
