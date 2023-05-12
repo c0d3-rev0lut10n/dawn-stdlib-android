@@ -73,6 +73,12 @@ struct NextId<'a> {
 }
 
 #[derive(Serialize)]
+struct SecurityNumber<'a> {
+	status: &'a str,
+	number: &'a str
+}
+
+#[derive(Serialize)]
 struct EncryptFile<'a> {
 	status: &'a str,
 	key: &'a str,

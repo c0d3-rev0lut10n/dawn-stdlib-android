@@ -20,7 +20,7 @@ use dawn_stdlib::*;
 use jni::JNIEnv;
 use jni::objects::{JByteArray, JClass, JString};
 use hex::{encode, decode};
-use crate::{Error, InitCrypto, SignKeys, SymKey, GenId, TempId, NextId};
+use crate::{Error, InitCrypto, SignKeys, SymKey, GenId, TempId, NextId, SecurityNumber};
 use crate::error;
 
 #[no_mangle]
@@ -169,4 +169,43 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_getNextId<'local> (
 		Err(_) => { error!(env, "Could not serialize json"); }
 	};
 	next_id_json
+}
+
+#[no_mangle]
+pub extern "C" fn Java_dawn_android_LibraryConnector_deriveSecurityNumber<'local> (
+	mut env: JNIEnv<'local>,
+	_class: JClass<'local>,
+	key_a: JString<'local>,
+	key_b: JString<'local>
+) -> JString<'local> {
+	
+	let key_a = env.get_string(&key_a);
+	if key_a.is_err() { error!(env, "Could not get java variable: key_a"); }
+	let key_a: String = key_a.unwrap().into();
+	let key_a = match decode(key_a) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "key_a invalid"); }
+	};
+	
+	let key_b = env.get_string(&key_b);
+	if key_b.is_err() { error!(env, "Could not get java variable: key_b"); }
+	let key_b: String = key_b.unwrap().into();
+	let key_b = match decode(key_b) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "key_b invalid"); }
+	};
+	
+	let security_number = SecurityNumber {
+		status: "ok",
+		number: &derive_security_number(&key_a, &key_b)
+	};
+	
+	let security_number_json = match serde_json::to_string(&security_number) {
+		Ok(res) => match env.new_string(res) {
+			Ok(jstring) => jstring,
+			Err(_) => { error!(env, "Could not create new java string"); }
+		}
+		Err(_) => { error!(env, "Could not serialize json"); }
+	};
+	security_number_json
 }
