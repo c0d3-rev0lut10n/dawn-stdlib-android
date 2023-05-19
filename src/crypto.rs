@@ -18,7 +18,7 @@
 
 use dawn_stdlib::*;
 use jni::JNIEnv;
-use jni::objects::{JByteArray, JClass, JString};
+use jni::objects::{JClass, JString};
 use hex::{encode, decode};
 use crate::{Error, InitCrypto, SignKeys, SymKey, GenId, TempId, NextId, SecurityNumber};
 use crate::error;
@@ -130,9 +130,14 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_getTempId<'local> (
 	if modifier.is_err() { error!(env, "Could not get java variable: modifier"); }
 	let modifier: String = modifier.unwrap().into();
 	
+	let id = match get_temp_id(&id, &modifier) {
+		Ok(res) => res,
+		Err(err) => { error!(env, &format!("Encountered an error while trying to derive temporary id: {}", err)); }
+	};
+	
 	let temp_id = TempId {
 		status: "ok",
-		id: &get_temp_id(&id, &modifier)
+		id: &id
 	};
 	
 	let temp_id_json = match serde_json::to_string(&temp_id) {
