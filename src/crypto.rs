@@ -161,9 +161,14 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_getNextId<'local> (
 	if id.is_err() { error!(env, "Could not get java variable: id"); }
 	let id: String = id.unwrap().into();
 	
+	let next_id = match get_next_id(&id) {
+		Ok(res) => res,
+		Err(err) => { error!(env, &format!("Encountered an error while trying to derive next id: {}", err)); }
+	};
+	
 	let next_id = NextId {
 		status: "ok",
-		id: &get_next_id(&id)
+		id: &next_id
 	};
 	
 	let next_id_json = match serde_json::to_string(&next_id) {
