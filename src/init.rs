@@ -253,7 +253,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseInitResponse<'local> (
 		Err(_) => { error!(env, "pfs_key invalid"); }
 	};
 	
-	let (remote_pubkey_kyber, remote_pubkey_sig, new_pfs_key, mdc) = match parse_init_response(&ciphertext, &own_seckey_kyber, &pfs_key) {
+	let (remote_pubkey_kyber, remote_pubkey_sig, new_pfs_key, mdc) = match parse_init_response(&ciphertext, &own_seckey_kyber, None, &pfs_key) {
 		Ok(res) => res,
 		Err(err) => { error!(env, &format!("init response could not be parsed: {}", err)); }
 	};

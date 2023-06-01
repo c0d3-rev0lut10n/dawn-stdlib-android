@@ -83,7 +83,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_sendMsg<'local> (
 		Err(_) => { error!(env, "pfs_key invalid"); }
 	};
 	
-	let (new_pfs_key, mdc, ciphertext) = match send_msg((msg_type, msg_string, msg_bytes), &remote_pubkey_kyber, &own_seckey_sig, &pfs_key) {
+	let (new_pfs_key, mdc, ciphertext) = match send_msg((msg_type, msg_string, msg_bytes), &remote_pubkey_kyber, Some(&own_seckey_sig), &pfs_key) {
 		Ok(res) => res,
 		Err(err) => { error!(env, &err); }
 	};

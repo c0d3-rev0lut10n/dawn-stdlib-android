@@ -205,9 +205,14 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_deriveSecurityNumber<'local
 		Err(_) => { error!(env, "key_b invalid"); }
 	};
 	
+	let number = match derive_security_number(&key_a, &key_b) {
+		Ok(res) => res,
+		Err(error) => { error!(env, &format!("Could not derive security number: {}", error)); }
+	};
+	
 	let security_number = SecurityNumber {
 		status: "ok",
-		number: &derive_security_number(&key_a, &key_b)
+		number: &number
 	};
 	
 	let security_number_json = match serde_json::to_string(&security_number) {
