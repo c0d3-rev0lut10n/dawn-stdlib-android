@@ -115,7 +115,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genId<'local> (
 }
 
 #[no_mangle]
-pub extern "C" fn Java_dawn_android_LibraryConnector_getTempId<'local> (
+pub extern "C" fn Java_dawn_android_LibraryConnector_getCustomTempId<'local> (
 	mut env: JNIEnv<'local>,
 	_class: JClass<'local>,
 	id: JString<'local>,
@@ -130,7 +130,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_getTempId<'local> (
 	if modifier.is_err() { error!(env, "Could not get java variable: modifier"); }
 	let modifier: String = modifier.unwrap().into();
 	
-	let id = match get_temp_id(&id, &modifier) {
+	let id = match get_custom_temp_id(&id, &modifier) {
 		Ok(res) => res,
 		Err(err) => { error!(env, &format!("Encountered an error while trying to derive temporary id: {}", err)); }
 	};
