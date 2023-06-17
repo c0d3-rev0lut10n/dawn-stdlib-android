@@ -115,6 +115,37 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genId<'local> (
 }
 
 #[no_mangle]
+pub extern "C" fn Java_dawn_android_LibraryConnector_getTempId<'local> (
+	mut env: JNIEnv<'local>,
+	_class: JClass<'local>,
+	id: JString<'local>
+) -> JString<'local> {
+	
+	let id = env.get_string(&id);
+	if id.is_err() { error!(env, "Could not get java variable: id"); }
+	let id: String = id.unwrap().into();
+	
+	let id = match get_temp_id(&id) {
+		Ok(res) => res,
+		Err(err) => { error!(env, &format!("Encountered an error while trying to derive temporary id: {}", err)); }
+	};
+	
+	let temp_id = TempId {
+		status: "ok",
+		id: &id
+	};
+	
+	let temp_id_json = match serde_json::to_string(&temp_id) {
+		Ok(res) => match env.new_string(res) {
+			Ok(jstring) => jstring,
+			Err(_) => { error!(env, "Could not create new java string"); }
+		}
+		Err(_) => { error!(env, "Could not serialize json"); }
+	};
+	temp_id_json
+}
+
+#[no_mangle]
 pub extern "C" fn Java_dawn_android_LibraryConnector_getCustomTempId<'local> (
 	mut env: JNIEnv<'local>,
 	_class: JClass<'local>,
