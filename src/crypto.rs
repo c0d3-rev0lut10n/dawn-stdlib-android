@@ -186,13 +186,18 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_getNextId<'local> (
 	mut env: JNIEnv<'local>,
 	_class: JClass<'local>,
 	id: JString<'local>,
+	salt: JString<'local>
 ) -> JString<'local> {
 	
 	let id = env.get_string(&id);
 	if id.is_err() { error!(env, "Could not get java variable: id"); }
 	let id: String = id.unwrap().into();
 	
-	let next_id = match get_next_id(&id) {
+	let salt = env.get_string(&salt);
+	if salt.is_err() { error!(env, "Could not get java variable: salt"); }
+	let salt: String = salt.unwrap().into();
+	
+	let next_id = match get_next_id(&id, &salt) {
 		Ok(res) => res,
 		Err(err) => { error!(env, &format!("Encountered an error while trying to derive next id: {}", err)); }
 	};
