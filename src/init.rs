@@ -29,7 +29,9 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genInitRequest<'local> (
 	mut env: JNIEnv<'local>,
 	_class: JClass<'local>,
 	remote_pubkey_kyber: JString<'local>,
+	remote_pubkey_kyber_for_salt: JString<'local>,
 	remote_pubkey_curve: JString<'local>,
+	remote_pubkey_curve_for_salt: JString<'local>,
 	own_pubkey_sig: JString<'local>,
 	own_seckey_sig: JString<'local>,
 	name: JString<'local>,
@@ -44,12 +46,28 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genInitRequest<'local> (
 		Err(_) => { error!(env, "remote_pubkey_kyber invalid"); }
 	};
 	
+	let remote_pubkey_kyber_for_salt = env.get_string(&remote_pubkey_kyber_for_salt);
+	if remote_pubkey_kyber_for_salt.is_err() { error!(env, "Could not get java variable: remote_pubkey_kyber_for_salt"); }
+	let remote_pubkey_kyber_for_salt: String = remote_pubkey_kyber_for_salt.unwrap().into();
+	let remote_pubkey_kyber_for_salt = match decode(remote_pubkey_kyber_for_salt) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "remote_pubkey_kyber_for_salt invalid"); }
+	};
+	
 	let remote_pubkey_curve = env.get_string(&remote_pubkey_curve);
 	if remote_pubkey_curve.is_err() { error!(env, "Could not get java variable: remote_pubkey_curve"); }
 	let remote_pubkey_curve: String = remote_pubkey_curve.unwrap().into();
 	let remote_pubkey_curve = match decode(remote_pubkey_curve) {
 		Ok(res) => res,
 		Err(_) => { error!(env, "remote_pubkey_curve invalid"); }
+	};
+	
+	let remote_pubkey_curve_for_salt = env.get_string(&remote_pubkey_curve_for_salt);
+	if remote_pubkey_curve_for_salt.is_err() { error!(env, "Could not get java variable: remote_pubkey_curve_for_salt"); }
+	let remote_pubkey_curve_for_salt: String = remote_pubkey_curve_for_salt.unwrap().into();
+	let remote_pubkey_curve_for_salt = match decode(remote_pubkey_curve_for_salt) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "remote_pubkey_curve_for_salt invalid"); }
 	};
 	
 	let own_pubkey_sig = env.get_string(&own_pubkey_sig);
@@ -76,7 +94,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genInitRequest<'local> (
 	if comment.is_err() { error!(env, "Could not get java variable: comment"); }
 	let comment: String = comment.unwrap().into();
 	
-	let ((own_pubkey_kyber, own_seckey_kyber), (own_pubkey_curve, own_seckey_curve), pfs_key, id, mdc, ciphertext) = match gen_init_request(&remote_pubkey_kyber, &remote_pubkey_curve, &own_pubkey_sig, &own_seckey_sig, &name, &comment) {
+	let ((own_pubkey_kyber, own_seckey_kyber), (own_pubkey_curve, own_seckey_curve), pfs_key, pfs_salt, id, id_salt, mdc, ciphertext) = match gen_init_request(&remote_pubkey_kyber, &remote_pubkey_kyber_for_salt, &remote_pubkey_curve, &remote_pubkey_curve_for_salt, &own_pubkey_sig, &own_seckey_sig, &name, &comment) {
 		Ok(res) => res,
 		Err(err) => { error!(env, &format!("Could not generate init request: {}", err)); }
 	};
@@ -88,7 +106,9 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genInitRequest<'local> (
 		own_pubkey_curve: &encode(own_pubkey_curve),
 		own_seckey_curve: &encode(own_seckey_curve),
 		pfs_key: &encode(pfs_key),
+		pfs_salt: &encode(pfs_salt),
 		id: &id,
+		id_salt: &encode(id_salt),
 		mdc: &mdc,
 		ciphertext: &BASE64.encode(ciphertext)
 	};

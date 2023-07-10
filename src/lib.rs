@@ -143,7 +143,9 @@ struct GenInitRequest<'a> {
 	own_pubkey_curve: &'a str,
 	own_seckey_curve: &'a str,
 	pfs_key: &'a str,
+	pfs_salt: &'a str,
 	id: &'a str,
+	id_salt: &'a str,
 	mdc: &'a str,
 	ciphertext: &'a str
 }
