@@ -124,6 +124,8 @@ struct ParseHandle<'a> {
 	status: &'a str,
 	init_pk_kyber: &'a str,
 	init_pk_curve: &'a str,
+	init_pk_kyber_for_salt: &'a str,
+	init_pk_curve_for_salt: &'a str,
 	name: &'a str
 }
 

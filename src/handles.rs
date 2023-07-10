@@ -30,6 +30,8 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genHandle<'local> (
 	_class: JClass<'local>,
 	init_pubkey_kyber: JString<'local>,
 	init_pubkey_curve: JString<'local>,
+	init_pubkey_kyber_for_salt: JString<'local>,
+	init_pubkey_curve_for_salt: JString<'local>,
 	name: JString<'local>
 ) -> JString<'local> {
 	
@@ -48,6 +50,20 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genHandle<'local> (
 		Ok(bytes) => bytes,
 		Err(_) => { error!(env, "init_pubkey_curve invalid"); }
 	};
+	let init_pubkey_kyber_for_salt = env.get_string(&init_pubkey_kyber_for_salt);
+	if init_pubkey_kyber_for_salt.is_err() { error!(env, "Could not get java variable: init_pubkey_kyber_for_salt"); }
+	let init_pubkey_kyber_for_salt: String = init_pubkey_kyber_for_salt.unwrap().into();
+	let init_pubkey_kyber_for_salt = match decode(init_pubkey_kyber_for_salt) {
+		Ok(bytes) => bytes,
+		Err(_) => { error!(env, "init_pubkey_kyber_for_salt invalid"); }
+	};
+	let init_pubkey_curve_for_salt = env.get_string(&init_pubkey_curve_for_salt);
+	if init_pubkey_curve_for_salt.is_err() { error!(env, "Could not get java variable: init_pubkey_curve_for_salt"); }
+	let init_pubkey_curve_for_salt: String = init_pubkey_curve_for_salt.unwrap().into();
+	let init_pubkey_curve_for_salt = match decode(init_pubkey_curve_for_salt) {
+		Ok(bytes) => bytes,
+		Err(_) => { error!(env, "init_pubkey_curve_for_salt invalid"); }
+	};
 	
 	let name = env.get_string(&name);
 	if name.is_err() { error!(env, "Could not get java variable: name"); }
@@ -55,7 +71,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genHandle<'local> (
 	
 	let handle = GenHandle {
 		status: "ok",
-		handle: &BASE64.encode(gen_handle(init_pubkey_kyber, init_pubkey_curve, &name))
+		handle: &BASE64.encode(gen_handle(&init_pubkey_kyber, &init_pubkey_curve, &init_pubkey_kyber_for_salt, &init_pubkey_curve_for_salt, &name))
 	};
 	
 	let handle_json = match serde_json::to_string(&handle) {
