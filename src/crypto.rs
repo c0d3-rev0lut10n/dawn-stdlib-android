@@ -29,14 +29,18 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_initCrypto<'local> (
 	_class: JClass<'local>,
 ) -> JString<'local> {
 	
-	let ((own_pubkey_kyber, own_seckey_kyber), (own_pubkey_curve, own_seckey_curve), id) = init_crypto();
+	let ((own_pubkey_kyber, own_seckey_kyber), (own_pubkey_curve, own_seckey_curve), (own_pubkey_kyber_for_salt, own_seckey_kyber_for_salt), (own_pubkey_curve_for_salt, own_seckey_curve_for_salt), id) = init_crypto();
 	let init_crypto = InitCrypto {
 		status: "ok",
 		id: &id,
 		own_pubkey_kyber: &encode(own_pubkey_kyber),
 		own_seckey_kyber: &encode(own_seckey_kyber),
 		own_pubkey_curve: &encode(own_pubkey_curve),
-		own_seckey_curve: &encode(own_seckey_curve)
+		own_seckey_curve: &encode(own_seckey_curve),
+		own_pubkey_kyber_for_salt: &encode(own_pubkey_kyber_for_salt),
+		own_seckey_kyber_for_salt: &encode(own_seckey_kyber_for_salt),
+		own_pubkey_curve_for_salt: &encode(own_pubkey_curve_for_salt),
+		own_seckey_curve_for_salt: &encode(own_seckey_curve_for_salt)
 	};
 	
 	let init_crypto_json = match serde_json::to_string(&init_crypto) {

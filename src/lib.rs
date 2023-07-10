@@ -38,7 +38,11 @@ struct InitCrypto<'a> {
 	own_pubkey_kyber: &'a str,
 	own_seckey_kyber: &'a str,
 	own_pubkey_curve: &'a str,
-	own_seckey_curve: &'a str
+	own_seckey_curve: &'a str,
+	own_pubkey_kyber_for_salt: &'a str,
+	own_seckey_kyber_for_salt: &'a str,
+	own_pubkey_curve_for_salt: &'a str,
+	own_seckey_curve_for_salt: &'a str
 }
 
 #[derive(Serialize)]
