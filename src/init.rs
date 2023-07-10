@@ -205,7 +205,8 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_acceptInitRequest<'local> (
 	own_seckey_sig: JString<'local>,
 	own_pubkey_sig: JString<'local>,
 	remote_pubkey_kyber: JString<'local>,
-	pfs_key: JString<'local>
+	pfs_key: JString<'local>,
+	pfs_salt: JString<'local>
 ) -> JString<'local> {
 	
 	let own_seckey_sig = env.get_string(&own_seckey_sig);
@@ -240,7 +241,15 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_acceptInitRequest<'local> (
 		Err(_) => { error!(env, "pfs_key invalid"); }
 	};
 	
-	let (new_pfs_key, (own_pubkey_kyber, own_seckey_kyber), mdc, ciphertext) = match accept_init_request(&own_pubkey_sig, &own_seckey_sig, &remote_pubkey_kyber, &pfs_key) {
+	let pfs_salt = env.get_string(&pfs_salt);
+	if pfs_salt.is_err() { error!(env, "Could not get java variable: pfs_salt"); }
+	let pfs_salt: String = pfs_salt.unwrap().into();
+	let pfs_salt = match decode(pfs_salt) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "pfs_salt invalid"); }
+	};
+	
+	let (new_pfs_key, (own_pubkey_kyber, own_seckey_kyber), mdc, ciphertext) = match accept_init_request(&own_pubkey_sig, &own_seckey_sig, &remote_pubkey_kyber, &pfs_key, &pfs_salt) {
 		Ok(res) => res,
 		Err(err) => { error!(env, &format!("Could not create init accept message: {}", err)); }
 	};
