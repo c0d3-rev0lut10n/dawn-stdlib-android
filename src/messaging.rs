@@ -35,7 +35,8 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_sendMsg<'local> (
 	msg_bytes: JByteArray<'local>,
 	remote_pubkey_kyber: JString<'local>,
 	own_seckey_sig: JString<'local>,
-	pfs_key: JString<'local>
+	pfs_key: JString<'local>,
+	pfs_salt: JString<'local>
 ) -> JString<'local> {
 	
 	let msg_type = match u8::try_from(msg_type) {
@@ -83,7 +84,15 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_sendMsg<'local> (
 		Err(_) => { error!(env, "pfs_key invalid"); }
 	};
 	
-	let (new_pfs_key, mdc, ciphertext) = match send_msg((msg_type, msg_string, msg_bytes), &remote_pubkey_kyber, Some(&own_seckey_sig), &pfs_key) {
+	let pfs_salt = env.get_string(&pfs_salt);
+	if pfs_salt.is_err() { error!(env, "Could not get java variable: pfs_salt"); }
+	let pfs_salt: String = pfs_salt.unwrap().into();
+	let pfs_salt = match decode(pfs_salt) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "pfs_salt invalid"); }
+	};
+	
+	let (new_pfs_key, mdc, ciphertext) = match send_msg((msg_type, msg_string, msg_bytes), &remote_pubkey_kyber, Some(&own_seckey_sig), &pfs_key, &pfs_salt) {
 		Ok(res) => res,
 		Err(err) => { error!(env, &err); }
 	};
@@ -111,7 +120,8 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseMsg<'local> (
 	msg_ciphertext: JByteArray<'local>,
 	own_seckey_kyber: JString<'local>,
 	remote_pubkey_sig: JString<'local>,
-	pfs_key: JString<'local>
+	pfs_key: JString<'local>,
+	pfs_salt: JString<'local>
 ) -> JString<'local> {
 	
 	let msg_ciphertext = env.convert_byte_array(msg_ciphertext);
@@ -149,7 +159,15 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseMsg<'local> (
 		Err(_) => { error!(env, "pfs_key invalid"); }
 	};
 	
-	let ((msg_type, msg_text, msg_bytes), new_pfs_key, mdc) = match parse_msg(&msg_ciphertext, &own_seckey_kyber, optional_remote_pubkey_sig, &pfs_key) {
+	let pfs_salt = env.get_string(&pfs_salt);
+	if pfs_salt.is_err() { error!(env, "Could not get java variable: pfs_salt"); }
+	let pfs_salt: String = pfs_salt.unwrap().into();
+	let pfs_salt = match decode(pfs_salt) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "pfs_salt invalid"); }
+	};
+	
+	let ((msg_type, msg_text, msg_bytes), new_pfs_key, mdc) = match parse_msg(&msg_ciphertext, &own_seckey_kyber, optional_remote_pubkey_sig, &pfs_key, &pfs_salt) {
 		Ok(res) => res,
 		Err(err) => { error!(env, &err); }
 	};
