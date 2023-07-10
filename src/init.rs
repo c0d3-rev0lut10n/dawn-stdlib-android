@@ -279,7 +279,8 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseInitResponse<'local> (
 	_class: JClass<'local>,
 	ciphertext: JByteArray<'local>,
 	own_seckey_kyber: JString<'local>,
-	pfs_key: JString<'local>
+	pfs_key: JString<'local>,
+	pfs_salt: JString<'local>
 ) -> JString<'local> {
 	
 	let ciphertext = env.convert_byte_array(ciphertext);
@@ -302,7 +303,15 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseInitResponse<'local> (
 		Err(_) => { error!(env, "pfs_key invalid"); }
 	};
 	
-	let (remote_pubkey_kyber, remote_pubkey_sig, new_pfs_key, mdc) = match parse_init_response(&ciphertext, &own_seckey_kyber, None, &pfs_key) {
+	let pfs_salt = env.get_string(&pfs_salt);
+	if pfs_salt.is_err() { error!(env, "Could not get java variable: pfs_salt"); }
+	let pfs_salt: String = pfs_salt.unwrap().into();
+	let pfs_salt = match decode(pfs_salt) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "pfs_salt invalid"); }
+	};
+	
+	let (remote_pubkey_kyber, remote_pubkey_sig, new_pfs_key, mdc) = match parse_init_response(&ciphertext, &own_seckey_kyber, None, &pfs_key, &pfs_salt) {
 		Ok(res) => res,
 		Err(err) => { error!(env, &format!("init response could not be parsed: {}", err)); }
 	};
