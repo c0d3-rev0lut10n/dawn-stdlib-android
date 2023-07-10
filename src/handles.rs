@@ -95,7 +95,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseHandle<'local> (
 	if handle.is_err() { error!(env, "Could not get java variable: handle"); }
 	let handle = handle.unwrap();
 	
-	let (init_pubkey_kyber, init_pubkey_curve, name) = match parse_handle(handle) {
+	let (init_pubkey_kyber, init_pubkey_curve, init_pubkey_kyber_for_salt, init_pubkey_curve_for_salt, name) = match parse_handle(handle) {
 		Ok(res) => res,
 		Err(err) => { error!(env, &format!("Standard Library returned error: {}", err)); }
 	};
@@ -104,6 +104,8 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseHandle<'local> (
 		status: "ok",
 		init_pk_kyber: &encode(init_pubkey_kyber),
 		init_pk_curve: &encode(init_pubkey_curve),
+		init_pk_kyber_for_salt: &encode(init_pubkey_kyber_for_salt),
+		init_pk_curve_for_salt: &encode(init_pubkey_curve_for_salt),
 		name: &name
 	};
 	
