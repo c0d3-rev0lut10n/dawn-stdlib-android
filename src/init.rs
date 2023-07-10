@@ -129,7 +129,9 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseInitRequest<'local> (
 	_class: JClass<'local>,
 	ciphertext: JByteArray<'local>,
 	own_seckey_kyber: JString<'local>,
-	own_seckey_curve: JString<'local>
+	own_seckey_curve: JString<'local>,
+	own_seckey_kyber_for_salt: JString<'local>,
+	own_seckey_curve_for_salt: JString<'local>
 ) -> JString<'local> {
 	
 	let ciphertext = env.convert_byte_array(ciphertext);
@@ -152,7 +154,23 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseInitRequest<'local> (
 		Err(_) => { error!(env, "own_seckey_curve invalid"); }
 	};
 	
-	let (id, mdc, remote_pubkey_kyber, remote_pubkey_sig, new_pfs_key, name, comment) = match parse_init_request(&ciphertext, &own_seckey_kyber, &own_seckey_curve) {
+	let own_seckey_kyber_for_salt = env.get_string(&own_seckey_kyber_for_salt);
+	if own_seckey_kyber_for_salt.is_err() { error!(env, "Could not get java variable: own_seckey_kyber_for_salt"); }
+	let own_seckey_kyber_for_salt: String = own_seckey_kyber_for_salt.unwrap().into();
+	let own_seckey_kyber_for_salt = match decode(own_seckey_kyber_for_salt) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "own_seckey_kyber_for_salt invalid"); }
+	};
+	
+	let own_seckey_curve_for_salt = env.get_string(&own_seckey_curve_for_salt);
+	if own_seckey_curve_for_salt.is_err() { error!(env, "Could not get java variable: own_seckey_curve_for_salt"); }
+	let own_seckey_curve_for_salt: String = own_seckey_curve_for_salt.unwrap().into();
+	let own_seckey_curve_for_salt = match decode(own_seckey_curve_for_salt) {
+		Ok(res) => res,
+		Err(_) => { error!(env, "own_seckey_curve_for_salt invalid"); }
+	};
+	
+	let (id, id_salt, mdc, remote_pubkey_kyber, remote_pubkey_sig, new_pfs_key, pfs_salt, name, comment) = match parse_init_request(&ciphertext, &own_seckey_kyber, &own_seckey_curve, &own_seckey_kyber_for_salt, &own_seckey_curve_for_salt) {
 		Ok(res) => res,
 		Err(err) => { error!(env, &format!("Could not parse init request: {}", err)); }
 	};
@@ -160,10 +178,12 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseInitRequest<'local> (
 	let parse_init_request = ParseInitRequest {
 		status: "ok",
 		id: &id,
+		id_salt: &encode(id_salt),
 		mdc: &mdc,
 		remote_pubkey_kyber: &encode(remote_pubkey_kyber),
 		remote_pubkey_sig: &encode(remote_pubkey_sig),
 		new_pfs_key: &encode(new_pfs_key),
+		pfs_salt: &encode(pfs_salt),
 		name: &name,
 		comment: &comment
 	};

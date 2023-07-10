@@ -154,10 +154,12 @@ struct GenInitRequest<'a> {
 struct ParseInitRequest<'a> {
 	status: &'a str,
 	id: &'a str,
+	id_salt: &'a str,
 	mdc: &'a str,
 	remote_pubkey_kyber: &'a str,
 	remote_pubkey_sig: &'a str,
 	new_pfs_key: &'a str,
+	pfs_salt: &'a str,
 	name: &'a str,
 	comment: &'a str
 }
