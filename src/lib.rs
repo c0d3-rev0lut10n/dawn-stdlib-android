@@ -83,6 +83,12 @@ struct SecurityNumber<'a> {
 }
 
 #[derive(Serialize)]
+struct Hash<'a> {
+	status: &'a str,
+	hash: &'a str
+}
+
+#[derive(Serialize)]
 struct EncryptFile<'a> {
 	status: &'a str,
 	key: &'a str,
