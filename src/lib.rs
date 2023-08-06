@@ -134,6 +134,7 @@ struct ParseHandle<'a> {
 	status: &'a str,
 	init_pk_kyber: &'a str,
 	init_pk_curve: &'a str,
+	init_pk_curve_pfs_2: &'a str,
 	init_pk_kyber_for_salt: &'a str,
 	init_pk_curve_for_salt: &'a str,
 	name: &'a str
@@ -148,7 +149,8 @@ struct GenInitRequest<'a> {
 	own_seckey_kyber: &'a str,
 	own_pubkey_curve: &'a str,
 	own_seckey_curve: &'a str,
-	pfs_key: &'a str,
+	own_pfs_key: &'a str,
+	remote_pfs_key: &'a str,
 	pfs_salt: &'a str,
 	id: &'a str,
 	id_salt: &'a str,
@@ -164,7 +166,8 @@ struct ParseInitRequest<'a> {
 	mdc: &'a str,
 	remote_pubkey_kyber: &'a str,
 	remote_pubkey_sig: &'a str,
-	new_pfs_key: &'a str,
+	own_pfs_key: &'a str,
+	remote_pfs_key: &'a str,
 	pfs_salt: &'a str,
 	name: &'a str,
 	comment: &'a str
