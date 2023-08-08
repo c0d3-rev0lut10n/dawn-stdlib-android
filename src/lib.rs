@@ -101,6 +101,12 @@ struct DecryptFile<'a> {
 	file: &'a str
 }
 
+#[derive(Serialize)]
+struct Timestamp<'a> {
+	status: &'a str,
+	timestamp: &'a str
+}
+
 // Used in the messaging module:
 
 #[derive(Serialize)]

@@ -20,7 +20,7 @@ use dawn_stdlib::*;
 use jni::JNIEnv;
 use jni::objects::{JClass, JString, JByteArray};
 use hex::{encode, decode};
-use crate::{Error, InitCrypto, SignKeys, SymKey, GenId, TempId, NextId, SecurityNumber, Hash};
+use crate::{Error, InitCrypto, SignKeys, SymKey, GenId, TempId, NextId, SecurityNumber, Hash, Timestamp};
 use crate::error;
 
 #[no_mangle]
@@ -320,4 +320,28 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_hashBytes<'local> (
 		Err(_) => { error!(env, "Could not serialize json"); }
 	};
 	hash_json
+}
+
+#[no_mangle]
+pub extern "C" fn Java_dawn_android_LibraryConnector_getCurrentTimestamp<'local> (
+	env: JNIEnv<'local>,
+	_class: JClass<'local>,
+) -> JString<'local> {
+	
+	let timestamp = get_current_timestamp();
+	if timestamp.is_err() { error!(env, "Could not get timestamp"); }
+	
+	let timestamp = Timestamp {
+		status: "ok",
+		timestamp: &timestamp.unwrap()
+	};
+	
+	let timestamp_json = match serde_json::to_string(&timestamp) {
+		Ok(res) => match env.new_string(res) {
+			Ok(jstring) => jstring,
+			Err(_) => { error!(env, "Could not create new java string"); }
+		}
+		Err(_) => { error!(env, "Could not serialize json"); }
+	};
+	timestamp_json
 }
