@@ -107,6 +107,12 @@ struct Timestamp<'a> {
 	timestamp: &'a str
 }
 
+#[derive(Serialize)]
+struct MultiTimestamp<'a> {
+	status: &'a str,
+	timestamps: Vec<String>
+}
+
 // Used in the messaging module:
 
 #[derive(Serialize)]

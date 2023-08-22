@@ -20,7 +20,7 @@ use dawn_stdlib::*;
 use jni::JNIEnv;
 use jni::objects::{JClass, JString, JByteArray};
 use hex::{encode, decode};
-use crate::{Error, InitCrypto, SignKeys, SymKey, GenId, TempId, NextId, SecurityNumber, Hash, Timestamp};
+use crate::{Error, InitCrypto, SignKeys, SymKey, GenId, TempId, NextId, SecurityNumber, Hash, Timestamp, MultiTimestamp};
 use crate::error;
 
 #[no_mangle]
@@ -344,4 +344,33 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_getCurrentTimestamp<'local>
 		Err(_) => { error!(env, "Could not serialize json"); }
 	};
 	timestamp_json
+}
+
+#[no_mangle]
+pub extern "C" fn Java_dawn_android_LibraryConnector_getAllTimestampsSince<'local>(
+	mut env: JNIEnv<'local>,
+	_class: JClass<'local>,
+	timestamp: JString<'local>
+) -> JString<'local> {
+	
+	let timestamp = env.get_string(&timestamp);
+	if timestamp.is_err() { error!(env, "Could not get java variable: timestamp"); }
+	let timestamp: String = timestamp.unwrap().into();
+	
+	let timestamps = get_all_timestamps_since(&timestamp);
+	if timestamps.is_err() { error!(env, &format!("Could not calculate timestamps: {}", timestamps.unwrap_err())); }
+	
+	let timestamps = MultiTimestamp {
+		status: "ok",
+		timestamps: timestamps.unwrap()
+	};
+	
+	let timestamps_json = match serde_json::to_string(&timestamps) {
+		Ok(res) => match env.new_string(res) {
+			Ok(jstring) => jstring,
+			Err(_) => { error!(env, "Could not create new java string"); }
+		}
+		Err(_) => { error!(env, "Could not serialize json"); }
+	};
+	timestamps_json
 }
