@@ -36,7 +36,9 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_sendMsg<'local> (
 	remote_pubkey_kyber: JString<'local>,
 	own_seckey_sig: JString<'local>,
 	pfs_key: JString<'local>,
-	pfs_salt: JString<'local>
+	pfs_salt: JString<'local>,
+	id: JString<'local>,
+	mdc_seed: JString<'local>
 ) -> JString<'local> {
 	
 	let msg_type = match u8::try_from(msg_type) {
@@ -92,7 +94,15 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_sendMsg<'local> (
 		Err(_) => { error!(env, "pfs_salt invalid"); }
 	};
 	
-	let (new_pfs_key, mdc, ciphertext) = match send_msg((msg_type, msg_string, msg_bytes), &remote_pubkey_kyber, Some(&own_seckey_sig), &pfs_key, &pfs_salt) {
+	let id = env.get_string(&id);
+	if id.is_err() { error!(env, "Could not get java variable: id"); }
+	let id: String = id.unwrap().into();
+	
+	let mdc_seed = env.get_string(&mdc_seed);
+	if mdc_seed.is_err() { error!(env, "Could not get java variable: mdc_seed"); }
+	let mdc_seed: String = mdc_seed.unwrap().into();
+	
+	let (new_pfs_key, mdc, ciphertext) = match send_msg((msg_type, msg_string, msg_bytes), &remote_pubkey_kyber, Some(&own_seckey_sig), &pfs_key, &pfs_salt, &id, &mdc_seed) {
 		Ok(res) => res,
 		Err(err) => { error!(env, &err); }
 	};

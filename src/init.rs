@@ -103,7 +103,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genInitRequest<'local> (
 	if comment.is_err() { error!(env, "Could not get java variable: comment"); }
 	let comment: String = comment.unwrap().into();
 	
-	let ((own_pubkey_kyber, own_seckey_kyber), (own_pubkey_curve, own_seckey_curve), own_pfs_key, remote_pfs_key, pfs_salt, id, id_salt, mdc, ciphertext) = match gen_init_request(&remote_pubkey_kyber, &remote_pubkey_kyber_for_salt, &remote_pubkey_curve, &remote_pubkey_curve_pfs_2, &remote_pubkey_curve_for_salt, &own_pubkey_sig, &own_seckey_sig, &name, &comment) {
+	let ((own_pubkey_kyber, own_seckey_kyber), (own_pubkey_curve, own_seckey_curve), own_pfs_key, remote_pfs_key, pfs_salt, id, id_salt, mdc, mdc_seed, ciphertext) = match gen_init_request(&remote_pubkey_kyber, &remote_pubkey_kyber_for_salt, &remote_pubkey_curve, &remote_pubkey_curve_pfs_2, &remote_pubkey_curve_for_salt, &own_pubkey_sig, &own_seckey_sig, &name, &comment) {
 		Ok(res) => res,
 		Err(err) => { error!(env, &format!("Could not generate init request: {}", err)); }
 	};
@@ -120,6 +120,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genInitRequest<'local> (
 		id: &id,
 		id_salt: &encode(id_salt),
 		mdc: &mdc,
+		mdc_seed: &mdc_seed,
 		ciphertext: &BASE64.encode(ciphertext)
 	};
 	
@@ -189,7 +190,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseInitRequest<'local> (
 		Err(_) => { error!(env, "own_seckey_curve_for_salt invalid"); }
 	};
 	
-	let (id, id_salt, mdc, remote_pubkey_kyber, remote_pubkey_sig, own_pfs_key, remote_pfs_key, pfs_salt, name, comment) = match parse_init_request(&ciphertext, &own_seckey_kyber, &own_seckey_curve, &own_seckey_curve_pfs_2, &own_seckey_kyber_for_salt, &own_seckey_curve_for_salt) {
+	let (id, id_salt, mdc, remote_pubkey_kyber, remote_pubkey_sig, own_pfs_key, remote_pfs_key, pfs_salt, name, comment, mdc_seed) = match parse_init_request(&ciphertext, &own_seckey_kyber, &own_seckey_curve, &own_seckey_curve_pfs_2, &own_seckey_kyber_for_salt, &own_seckey_curve_for_salt) {
 		Ok(res) => res,
 		Err(err) => { error!(env, &format!("Could not parse init request: {}", err)); }
 	};
@@ -205,7 +206,8 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseInitRequest<'local> (
 		remote_pfs_key: &encode(remote_pfs_key),
 		pfs_salt: &encode(pfs_salt),
 		name: &name,
-		comment: &comment
+		comment: &comment,
+		mdc_seed: &mdc_seed
 	};
 	
 	let parse_init_request_json = match serde_json::to_string(&parse_init_request) {
@@ -226,7 +228,9 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_acceptInitRequest<'local> (
 	own_pubkey_sig: JString<'local>,
 	remote_pubkey_kyber: JString<'local>,
 	pfs_key: JString<'local>,
-	pfs_salt: JString<'local>
+	pfs_salt: JString<'local>,
+	id: JString<'local>,
+	mdc_seed: JString<'local>
 ) -> JString<'local> {
 	
 	let own_seckey_sig = env.get_string(&own_seckey_sig);
@@ -269,7 +273,15 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_acceptInitRequest<'local> (
 		Err(_) => { error!(env, "pfs_salt invalid"); }
 	};
 	
-	let (new_pfs_key, (own_pubkey_kyber, own_seckey_kyber), mdc, ciphertext) = match accept_init_request(&own_pubkey_sig, &own_seckey_sig, &remote_pubkey_kyber, &pfs_key, &pfs_salt) {
+	let id = env.get_string(&id);
+	if id.is_err() { error!(env, "Could not get java variable: id"); }
+	let id: String = id.unwrap().into();
+	
+	let mdc_seed = env.get_string(&mdc_seed);
+	if mdc_seed.is_err() { error!(env, "Could not get java variable: mdc_seed"); }
+	let mdc_seed: String = mdc_seed.unwrap().into();
+	
+	let (new_pfs_key, (own_pubkey_kyber, own_seckey_kyber), mdc, ciphertext) = match accept_init_request(&own_pubkey_sig, &own_seckey_sig, &remote_pubkey_kyber, &pfs_key, &pfs_salt, &id, &mdc_seed) {
 		Ok(res) => res,
 		Err(err) => { error!(env, &format!("Could not create init accept message: {}", err)); }
 	};

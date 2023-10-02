@@ -167,6 +167,7 @@ struct GenInitRequest<'a> {
 	id: &'a str,
 	id_salt: &'a str,
 	mdc: &'a str,
+	mdc_seed: &'a str,
 	ciphertext: &'a str
 }
 
@@ -182,7 +183,8 @@ struct ParseInitRequest<'a> {
 	remote_pfs_key: &'a str,
 	pfs_salt: &'a str,
 	name: &'a str,
-	comment: &'a str
+	comment: &'a str,
+	mdc_seed: &'a str
 }
 
 #[derive(Serialize)]
