@@ -20,7 +20,7 @@ use dawn_stdlib::*;
 use jni::JNIEnv;
 use jni::objects::{JClass, JString, JByteArray};
 use hex::{encode, decode};
-use crate::{Error, InitCrypto, SignKeys, SymKey, GenId, TempId, NextId, SecurityNumber, Hash, Timestamp, MultiTimestamp};
+use crate::{Error, InitCrypto, KyberKeys, CurveKeys, SignKeys, SymKey, GenId, TempId, NextId, SecurityNumber, Hash, Timestamp, MultiTimestamp};
 use crate::error;
 
 #[no_mangle]
@@ -51,6 +51,52 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_initCrypto<'local> (
 		Err(_) => { error!(env, "Could not serialize json"); }
 	};
 	init_crypto_json
+}
+
+#[no_mangle]
+pub extern "C" fn Java_dawn_android_LibraryConnector_kyberKeygen<'local> (
+	env: JNIEnv<'local>,
+	_class: JClass<'local>,
+) -> JString<'local> {
+	
+	let (own_pubkey_kyber, own_seckey_kyber) = kyber_keygen();
+	let kyber_keygen = KyberKeys {
+		status: "ok",
+		own_pubkey_kyber: &encode(own_pubkey_kyber),
+		own_seckey_kyber: &encode(own_seckey_kyber)
+	};
+	
+	let kyberkeys_json = match serde_json::to_string(&kyber_keygen) {
+		Ok(res) => match env.new_string(res) {
+			Ok(jstring) => jstring,
+			Err(_) => { error!(env, "Could not create new java string"); }
+		}
+		Err(_) => { error!(env, "Could not serialize json"); }
+	};
+	kyberkeys_json
+}
+
+#[no_mangle]
+pub extern "C" fn Java_dawn_android_LibraryConnector_curveKeygen<'local> (
+	env: JNIEnv<'local>,
+	_class: JClass<'local>,
+) -> JString<'local> {
+	
+	let (own_pubkey_curve, own_seckey_curve) = curve_keygen();
+	let curve_keygen = CurveKeys {
+		status: "ok",
+		own_pubkey_curve: &encode(own_pubkey_curve),
+		own_seckey_curve: &encode(own_seckey_curve)
+	};
+	
+	let curvekeys_json = match serde_json::to_string(&curve_keygen) {
+		Ok(res) => match env.new_string(res) {
+			Ok(jstring) => jstring,
+			Err(_) => { error!(env, "Could not create new java string"); }
+		}
+		Err(_) => { error!(env, "Could not serialize json"); }
+	};
+	curvekeys_json
 }
 
 #[no_mangle]

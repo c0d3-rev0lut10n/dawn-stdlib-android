@@ -46,6 +46,20 @@ struct InitCrypto<'a> {
 }
 
 #[derive(Serialize)]
+struct KyberKeys<'a> {
+	status: &'a str,
+	own_pubkey_kyber: &'a str,
+	own_seckey_kyber: &'a str,
+}
+
+#[derive(Serialize)]
+struct CurveKeys<'a> {
+	status: &'a str,
+	own_pubkey_curve: &'a str,
+	own_seckey_curve: &'a str,
+}
+
+#[derive(Serialize)]
 struct SignKeys<'a> {
 	status: &'a str,
 	own_pubkey_sig: &'a str,
