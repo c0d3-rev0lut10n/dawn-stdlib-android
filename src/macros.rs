@@ -19,7 +19,7 @@
 #[macro_export]
 macro_rules! error {
 	($env: expr, $a: expr) => {
-		let error = Error { status: $a };
+		let error = Error { status: &(String::from("@dawn-stdlib-android: ") + $a) };
 		return $env.new_string(serde_json::to_string(&error).expect("Could not return error")).expect("Could not create new java string");
 	}
 }
