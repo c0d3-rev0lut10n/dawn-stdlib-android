@@ -9,7 +9,7 @@ license = "GPL-3.0-or-later"
 [dependencies]
 dawn-stdlib = { path = "../dawn-stdlib" }
 jni = { version = "*" }
-serde = { version = "=1.0.171", features = ["derive"] }
+serde = { version = "*", features = ["derive"] }
 serde_json = { version = "*" }
 base64 = { version = "*" }
 hex = { version = "*" }
