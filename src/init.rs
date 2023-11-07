@@ -36,7 +36,8 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genInitRequest<'local> (
 	own_pubkey_sig: JString<'local>,
 	own_seckey_sig: JString<'local>,
 	name: JString<'local>,
-	comment: JString<'local>
+	comment: JString<'local>,
+	mdc: JString<'local>
 ) -> JString<'local> {
 	
 	let remote_pubkey_kyber = env.get_string(&remote_pubkey_kyber);
@@ -103,7 +104,11 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genInitRequest<'local> (
 	if comment.is_err() { error!(env, "Could not get java variable: comment"); }
 	let comment: String = comment.unwrap().into();
 	
-	let ((own_pubkey_kyber, own_seckey_kyber), (own_pubkey_curve, own_seckey_curve), own_pfs_key, remote_pfs_key, pfs_salt, id, id_salt, mdc, mdc_seed, ciphertext) = match gen_init_request(&remote_pubkey_kyber, &remote_pubkey_kyber_for_salt, &remote_pubkey_curve, &remote_pubkey_curve_pfs_2, &remote_pubkey_curve_for_salt, &own_pubkey_sig, &own_seckey_sig, &name, &comment) {
+	let mdc = env.get_string(&mdc);
+	if mdc.is_err() { error!(env, "Could not get java variable: mdc"); }
+	let mdc: String = mdc.unwrap().into();
+	
+	let ((own_pubkey_kyber, own_seckey_kyber), (own_pubkey_curve, own_seckey_curve), own_pfs_key, remote_pfs_key, pfs_salt, id, id_salt, mdc, mdc_seed, ciphertext) = match gen_init_request(&remote_pubkey_kyber, &remote_pubkey_kyber_for_salt, &remote_pubkey_curve, &remote_pubkey_curve_pfs_2, &remote_pubkey_curve_for_salt, &own_pubkey_sig, &own_seckey_sig, &name, &comment, &mdc) {
 		Ok(res) => res,
 		Err(err) => { error!(env, &format!("Could not generate init request: {}", err)); }
 	};

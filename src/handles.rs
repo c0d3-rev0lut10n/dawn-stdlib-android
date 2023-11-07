@@ -33,7 +33,8 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genHandle<'local> (
 	init_pubkey_curve_pfs_2: JString<'local>,
 	init_pubkey_kyber_for_salt: JString<'local>,
 	init_pubkey_curve_for_salt: JString<'local>,
-	name: JString<'local>
+	name: JString<'local>,
+	mdc: JString<'local>
 ) -> JString<'local> {
 	
 	let init_pubkey_kyber = env.get_string(&init_pubkey_kyber);
@@ -77,9 +78,13 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genHandle<'local> (
 	if name.is_err() { error!(env, "Could not get java variable: name"); }
 	let name: String = name.unwrap().into();
 	
+	let mdc = env.get_string(&mdc);
+	if mdc.is_err() { error!(env, "Could not get java variable: mdc"); }
+	let mdc: String = mdc.unwrap().into();
+	
 	let handle = GenHandle {
 		status: "ok",
-		handle: &BASE64.encode(gen_handle(&init_pubkey_kyber, &init_pubkey_curve, &init_pubkey_curve_pfs_2, &init_pubkey_kyber_for_salt, &init_pubkey_curve_for_salt, &name))
+		handle: &BASE64.encode(gen_handle(&init_pubkey_kyber, &init_pubkey_curve, &init_pubkey_curve_pfs_2, &init_pubkey_kyber_for_salt, &init_pubkey_curve_for_salt, &name, &mdc))
 	};
 	
 	let handle_json = match serde_json::to_string(&handle) {
@@ -103,7 +108,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseHandle<'local> (
 	if handle.is_err() { error!(env, "Could not get java variable: handle"); }
 	let handle = handle.unwrap();
 	
-	let (init_pubkey_kyber, init_pubkey_curve, init_pubkey_curve_pfs_2, init_pubkey_kyber_for_salt, init_pubkey_curve_for_salt, name) = match parse_handle(handle) {
+	let (init_pubkey_kyber, init_pubkey_curve, init_pubkey_curve_pfs_2, init_pubkey_kyber_for_salt, init_pubkey_curve_for_salt, name, mdc) = match parse_handle(handle) {
 		Ok(res) => res,
 		Err(err) => { error!(env, &format!("Standard Library returned error: {}", err)); }
 	};
@@ -115,7 +120,8 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseHandle<'local> (
 		init_pk_curve_pfs_2: &encode(init_pubkey_curve_pfs_2),
 		init_pk_kyber_for_salt: &encode(init_pubkey_kyber_for_salt),
 		init_pk_curve_for_salt: &encode(init_pubkey_curve_for_salt),
-		name: &name
+		name: &name,
+		mdc: &mdc,
 	};
 	
 	let parse_handle_json = match serde_json::to_string(&parse_handle) {

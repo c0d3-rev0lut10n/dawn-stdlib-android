@@ -163,7 +163,8 @@ struct ParseHandle<'a> {
 	init_pk_curve_pfs_2: &'a str,
 	init_pk_kyber_for_salt: &'a str,
 	init_pk_curve_for_salt: &'a str,
-	name: &'a str
+	name: &'a str,
+	mdc: &'a str,
 }
 
 // Used in the init module:
