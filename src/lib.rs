@@ -91,6 +91,12 @@ struct NextId<'a> {
 }
 
 #[derive(Serialize)]
+struct GenMdc<'a> {
+	status: &'a str,
+	mdc: &'a str
+}
+
+#[derive(Serialize)]
 struct SecurityNumber<'a> {
 	status: &'a str,
 	number: &'a str

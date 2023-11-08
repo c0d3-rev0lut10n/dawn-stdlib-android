@@ -20,7 +20,7 @@ use dawn_stdlib::*;
 use jni::JNIEnv;
 use jni::objects::{JClass, JString, JByteArray};
 use hex::{encode, decode};
-use crate::{Error, InitCrypto, KyberKeys, CurveKeys, SignKeys, SymKey, GenId, TempId, NextId, SecurityNumber, Hash, Timestamp, MultiTimestamp};
+use crate::{Error, InitCrypto, KyberKeys, CurveKeys, SignKeys, SymKey, GenId, TempId, NextId, GenMdc, SecurityNumber, Hash, Timestamp, MultiTimestamp};
 use crate::error;
 
 #[no_mangle]
@@ -265,6 +265,27 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_getNextId<'local> (
 		Err(_) => { error!(env, "Could not serialize json"); }
 	};
 	next_id_json
+}
+
+#[no_mangle]
+pub extern "C" fn Java_dawn_android_LibraryConnector_genMdc<'local> (
+	env: JNIEnv<'local>,
+	_class: JClass<'local>,
+) -> JString<'local> {
+	
+	let mdc = GenMdc {
+		status: "ok",
+		mdc: &mdc_gen(),
+	};
+	
+	let mdc_json = match serde_json::to_string(&mdc) {
+		Ok(res) => match env.new_string(res) {
+			Ok(jstring) => jstring,
+			Err(_) => { error!(env, "Could not create new java string"); }
+		}
+		Err(_) => { error!(env, "Could not serialize json"); }
+	};
+	mdc_json
 }
 
 #[no_mangle]
