@@ -344,7 +344,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_hashString<'local> (
 	let input: String = input.unwrap().into();
 	let input = input.as_bytes();
 	
-	let hash = hash(&input);
+	let hash = hash(input);
 	
 	let hash = Hash {
 		status: "ok",

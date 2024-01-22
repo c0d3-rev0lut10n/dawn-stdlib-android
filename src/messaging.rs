@@ -151,7 +151,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_parseMsg<'local> (
 	let remote_pubkey_sig: String = remote_pubkey_sig.unwrap().into();
 	let optional_remote_pubkey_sig;
 	let remote_pubkey_sig_decoded;
-	if &remote_pubkey_sig == "" {
+	if remote_pubkey_sig.is_empty() {
 		optional_remote_pubkey_sig = None;
 	}
 	else {
@@ -218,7 +218,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_encryptFile<'local> (
 	file: JByteArray<'local>,
 ) -> JString<'local> {
 	
-	let file = match env.convert_byte_array(&file) {
+	let file = match env.convert_byte_array(file) {
 		Ok(res) => res,
 		Err(_) => { error!(env, "Could not read file"); }
 	};
@@ -252,7 +252,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_decryptFile<'local> (
 	key: JString<'local>
 ) -> JString<'local> {
 	
-	let ciphertext = match env.convert_byte_array(&ciphertext) {
+	let ciphertext = match env.convert_byte_array(ciphertext) {
 		Ok(res) => res,
 		Err(_) => { error!(env, "Could not read ciphertext"); }
 	};
