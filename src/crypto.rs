@@ -269,6 +269,37 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_getNextId<'local> (
 
 #[no_mangle]
 pub extern "C" fn Java_dawn_android_LibraryConnector_genMdc<'local> (
+	mut env: JNIEnv<'local>,
+	_class: JClass<'local>,
+	mdc_seed: JString<'local>,
+	temp_id: JString<'local>
+) -> JString<'local> {
+	
+	let mdc_seed = env.get_string(&mdc_seed);
+	if mdc_seed.is_err() { error!(env, "Could not get java variable: mdc_seed"); }
+	let mdc_seed: String = mdc_seed.unwrap().into();
+	
+	let temp_id = env.get_string(&temp_id);
+	if temp_id.is_err() { error!(env, "Could not get java variable: temp_id"); }
+	let temp_id: String = temp_id.unwrap().into();
+	
+	let mdc = GenMdc {
+		status: "ok",
+		mdc: &predictable_mdc_gen(&mdc_seed, &temp_id),
+	};
+	
+	let mdc_json = match serde_json::to_string(&mdc) {
+		Ok(res) => match env.new_string(res) {
+			Ok(jstring) => jstring,
+			Err(_) => { error!(env, "Could not create new java string"); }
+		}
+		Err(_) => { error!(env, "Could not serialize json"); }
+	};
+	mdc_json
+}
+
+#[no_mangle]
+pub extern "C" fn Java_dawn_android_LibraryConnector_genPredictableMdc<'local> (
 	env: JNIEnv<'local>,
 	_class: JClass<'local>,
 ) -> JString<'local> {
