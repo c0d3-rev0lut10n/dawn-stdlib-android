@@ -268,7 +268,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_getNextId<'local> (
 }
 
 #[no_mangle]
-pub extern "C" fn Java_dawn_android_LibraryConnector_genMdc<'local> (
+pub extern "C" fn Java_dawn_android_LibraryConnector_genPredictableMdc<'local> (
 	mut env: JNIEnv<'local>,
 	_class: JClass<'local>,
 	mdc_seed: JString<'local>,
@@ -299,7 +299,7 @@ pub extern "C" fn Java_dawn_android_LibraryConnector_genMdc<'local> (
 }
 
 #[no_mangle]
-pub extern "C" fn Java_dawn_android_LibraryConnector_genPredictableMdc<'local> (
+pub extern "C" fn Java_dawn_android_LibraryConnector_genMdc<'local> (
 	env: JNIEnv<'local>,
 	_class: JClass<'local>,
 ) -> JString<'local> {
